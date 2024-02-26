@@ -1,5 +1,5 @@
 import cv2
-from cv import HandRecognized
+from hand_cv import HandRecognized
 
 
 def main():
