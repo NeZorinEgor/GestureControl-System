@@ -7,7 +7,7 @@ hands_detector = mp_hands.Hands()
 mp_draw = mp.solutions.drawing_utils
 
 
-def calculate_distance_between_points(x1, y1, x2, y2):
+def calculate_distance_between_finger(x1, y1, x2, y2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
@@ -19,10 +19,10 @@ def calculate_hand_distance(hand_landmark, focal_length=1000):
         :return: расстояния от руки до камеры
     """
     # Ширина ладони в метрах (примерное значение)
-    hand_width_meters = 0.050
+    hand_width_meters = 0.05
 
     # Размер ладони на изображении (пиксели)
-    hand_width_pixels = calculate_distance_between_points(hand_landmark[0][0], hand_landmark[0][1],
+    hand_width_pixels = calculate_distance_between_finger(hand_landmark[0][0], hand_landmark[0][1],
                                                           hand_landmark[1][0],
                                                           hand_landmark[1][1])
 
@@ -36,7 +36,7 @@ def process_hand_landmarks(image, hand_landmarks):
     x1, y1 = get_coordinate(hand_landmarks, 8, image)
     x2, y2 = get_coordinate(hand_landmarks, 4, image)
 
-    distance = calculate_distance_between_points(x1, y1, x2, y2)
+    distance = calculate_distance_between_finger(x1, y1, x2, y2)
     distance_str = "{:.2f}".format(distance)
 
     cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
@@ -46,6 +46,7 @@ def process_hand_landmarks(image, hand_landmarks):
     distance_to_camera = calculate_hand_distance([(x1, y1), (x2, y2)])
     cv2.putText(image, f'Distance to camera: {distance_to_camera:.2f} meters', (20, 50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    return distance
 
 
 def get_coordinate(hand_landmark, index, image):
