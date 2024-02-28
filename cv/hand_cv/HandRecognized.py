@@ -40,8 +40,10 @@ def process_hand_landmarks(image, hand_landmarks):
     distance_str = "{:.2f}".format(distance)
 
     cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    cv2.circle(image, (x1, y1), 10, (255, 0, 0), -1)
+    cv2.circle(image, (x2, y2), 10, (255, 0, 0), -1)
     cv2.putText(image, distance_str, (int((x1 + x2) / 2), int((y1 + y2) / 2) - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
     distance_to_camera = calculate_hand_distance([(x1, y1), (x2, y2)])
     cv2.putText(image, f'Distance to camera: {distance_to_camera:.2f} meters', (20, 50),

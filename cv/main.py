@@ -14,7 +14,6 @@ def main():
         return
 
     camera = cv2.VideoCapture(0)
-    prev_confidence_score = None
 
     while camera.isOpened():
         ret, frame = camera.read()
@@ -24,17 +23,12 @@ def main():
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 confidence_score = process_hand_landmarks(frame, hand_landmarks)
-
-                # Если предыдущее значение не задано или новое значение отличается от предыдущего
-                if prev_confidence_score is None or confidence_score != prev_confidence_score:
-                    if confidence_score > 80:
-                        ser.write(b'1')  # Отправляем '1' на Arduino
-                    else:
-                        ser.write(b'0')  # Отправляем '0' на Arduino
-                    prev_confidence_score = confidence_score
+                if confidence_score > 80:
+                    ser.write(b'1')
+                else:
+                    ser.write(b'0')
 
         cv2.imshow('Camera', frame)
-
         key = cv2.waitKey(1)
         if key == ord('q'):
             break
