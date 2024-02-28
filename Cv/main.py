@@ -1,6 +1,6 @@
 import cv2
 import serial
-from Cv.Hand.HandRecognized import process_hand_landmarks, hands_detector
+from Cv.Hand.Recognized import process_hand_landmarks, hands_detector
 
 PORT = 'COM9'
 BAUD_RATE = 9600
