@@ -1,17 +1,17 @@
 # import dearpygui.dearpygui as dpg
-# import cv2 as cv
+# import cv2 as Cv
 # import numpy as np
 #
 # dpg.create_context()
 # dpg.create_viewport(title='Custom Title', width=600, height=800)
 # dpg.setup_dearpygui()
 #
-# vid = cv.VideoCapture(0)
+# vid = Cv.VideoCapture(0)
 # ret, frame = vid.read()
 #
-# frame_width = vid.get(cv.CAP_PROP_FRAME_WIDTH)
-# frame_height = vid.get(cv.CAP_PROP_FRAME_HEIGHT)
-# video_fps = vid.get(cv.CAP_PROP_FPS)
+# frame_width = vid.get(Cv.CAP_PROP_FRAME_WIDTH)
+# frame_height = vid.get(Cv.CAP_PROP_FRAME_HEIGHT)
+# video_fps = vid.get(Cv.CAP_PROP_FPS)
 # print(frame_width)
 # print(frame_height)
 # print(video_fps)
