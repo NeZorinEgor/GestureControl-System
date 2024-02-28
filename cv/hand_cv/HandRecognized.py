@@ -53,5 +53,3 @@ def process_hand_landmarks(image, hand_landmarks):
 
 def get_coordinate(hand_landmark, index, image):
     return int(hand_landmark.landmark[index].x * image.shape[1]), int(hand_landmark.landmark[index].y * image.shape[0])
-
-
