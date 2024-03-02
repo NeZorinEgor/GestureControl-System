@@ -42,7 +42,5 @@ void loop() {
 * [Pyserial](https://github.com/pyserial/pyserial)
 * mqtt?
 
-Настольное приложение:
-* [DearPyGUI](https://github.com/hoffstadt/DearPyGui)
 
 
