@@ -1,9 +1,8 @@
 import cv2
 import mediapipe as mp
 
-# read web-camera
+# read web-camera / streem from ESP-32
 camera = cv2.VideoCapture(0)
-# read streem from ESP-32
 # camera = cv2.VideoCapture("http://172.20.10.8:81/streem")
 
 # mediapipe hand settings
@@ -14,7 +13,26 @@ mp_draw = mp.solutions.drawing_utils
 # list of poit id
 hand_points = [0 for point_id in range(21)]
 
+# list of fingertip
 up_fingers = [0 for finger in range(4)]
+
+def is_up_finger(points, hand_center_id, fingertip_id, finger_in_list_id):
+    """
+    `Finger is up? 1 : 0`
+    Логика определения:
+        Если расстояние от WRIST (запястье, 0 точка) до точки начала пальца
+        (INDEX_FINGER [5, 9, 13, 17]) больше, чем расстояние от точки начала пальца
+        (INDEX_FINGER [5, 9, 13, 17]) до кончика пальца, то палец согнут.
+    """
+    global up_fingers
+    distance_0_to_hand_center = abs(points[0] - points[hand_center_id])
+    distance_0_to_fingertip = abs(points[0] - points[fingertip_id])
+    distance_good = distance_0_to_hand_center + (distance_0_to_hand_center / 2)
+    if distance_0_to_fingertip > distance_good:
+        up_fingers[finger_in_list_id] = True
+    else:
+        up_fingers[finger_in_list_id] = False
+
 
 while camera.isOpened():
     # Read frame
@@ -38,15 +56,10 @@ while camera.isOpened():
                     case 16: cv2.circle(frame, (width, height), 15, (255, 0, 0), cv2.FILLED)       # Ring finder
                     case 20: cv2.circle(frame, (width, height), 15, (255, 255, 255), cv2.FILLED)   # Little finger
 
-            # `Finger UP?` 1 : 0
-            distance_0_5 = abs(hand_points[0] - hand_points[5])
-            distance_0_8 = abs(hand_points[0] - hand_points[8])
-            distance_good = distance_0_5 + (distance_0_5 / 2)
-            if distance_0_8 > distance_good:
-                up_fingers[0] = 1
-            else:
-                up_fingers[0] = 0
-
+            is_up_finger(hand_points, 5, 8, 0)
+            is_up_finger(hand_points, 9, 12, 1)
+            is_up_finger(hand_points, 13, 16, 2)
+            is_up_finger(hand_points, 17, 20, 3)
             print(up_fingers)
 
     # Draw frame
