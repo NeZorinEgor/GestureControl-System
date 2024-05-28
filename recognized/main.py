@@ -1,20 +1,21 @@
 import cv2
 import mediapipe as mp
+from datetime import datetime, timedelta
 
-# read web-camera / streem from ESP-32
+# read web-camera / stream from ESP-32
 camera = cv2.VideoCapture(0)
-# camera = cv2.VideoCapture("http://172.20.10.8:81/streem")
+# camera = cv2.VideoCapture("http://172.20.10.8:81/stream")
 
 # mediapipe hand settings
 mp_hand = mp.solutions.hands
 hands = mp_hand.Hands()
 mp_draw = mp.solutions.drawing_utils
 
-# list of poit id
-hand_points = [0 for point_id in range(21)]
+hand_points = [0 for _ in range(21)]   # list of hand points
+up_fingers = [0 for _ in range(4)]     # list of fingertip statuses
 
-# list of fingertip
-up_fingers = [0 for finger in range(4)]
+# dictionary to store the start time when a finger is detected up
+finger_start_times = {i: None for i in range(4)}
 
 def is_up_finger(points, hand_center_id, fingertip_id, finger_in_list_id):
     """
@@ -44,23 +45,31 @@ while camera.isOpened():
     if result.multi_hand_landmarks:
         for hand_lms in result.multi_hand_landmarks:
             mp_draw.draw_landmarks(frame, hand_lms, mp_hand.HAND_CONNECTIONS)
-            # Work with hand point. See https://www.researchgate.net/publication/357216549/figure/fig2/AS:1103448439304192@1640094017201/Hand-Landmark-in-MediaPipe-38.ppm
+            # Work with hand points
             for point_id, point_coordinates in enumerate(hand_lms.landmark):
                 width, height, color = frame.shape
                 width, height = int(point_coordinates.x * height), int(point_coordinates.y * width)
                 hand_points[point_id] = height
                 # Draw color point at frame
-                match point_id:
-                    case 8: cv2.circle(frame, (width, height), 15, (0, 0, 255), cv2.FILLED)        # Index finger
-                    case 12: cv2.circle(frame, (width, height), 15, (0, 255, 0), cv2.FILLED)       # Middle finger
-                    case 16: cv2.circle(frame, (width, height), 15, (255, 0, 0), cv2.FILLED)       # Ring finder
-                    case 20: cv2.circle(frame, (width, height), 15, (255, 255, 255), cv2.FILLED)   # Little finger
+                if point_id in [8, 12, 16, 20]:
+                    color = (0, 0, 255) if point_id == 8 else (0, 255, 0) if point_id == 12 else (255, 0, 0) if point_id == 16 else (255, 255, 255)
+                    cv2.circle(frame, (width, height), 15, color, cv2.FILLED)
 
             is_up_finger(hand_points, 5, 8, 0)
             is_up_finger(hand_points, 9, 12, 1)
             is_up_finger(hand_points, 13, 16, 2)
             is_up_finger(hand_points, 17, 20, 3)
             print(up_fingers)
+
+            now = datetime.now()
+            for finger_id, is_up in enumerate(up_fingers):
+                if is_up:
+                    if finger_start_times[finger_id] is None:
+                        finger_start_times[finger_id] = now
+                    elif now - finger_start_times[finger_id] >= timedelta(seconds=3):
+                        print(f"Finger {finger_id} has been up for 3 seconds.")
+                else:
+                    finger_start_times[finger_id] = None
 
     # Draw frame
     cv2.imshow('frame', frame)
