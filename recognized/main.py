@@ -1,61 +1,19 @@
 import cv2
-import mediapipe as mp
 from datetime import datetime, timedelta
-import math
 
-# mediapipe hand settings
-mp_hand = mp.solutions.hands
-hands = mp_hand.Hands()
-mp_draw = mp.solutions.drawing_utils
+from recognized.measurements import is_up_finger, process_hand_landmarks
+from recognized.config import (mp_hand,
+                               hands,
+                               mp_draw,
+                               hand_points,
+                               up_fingers,
+                               finger_start_times,
+                               all_fingers_bent_time,
+                               distance_mode,
+                               print_fingers_mode,
+                               print_coordinate_mode,
+                               previous_distance)
 
-hand_points = [0 for point_id in range(21)]        # list of point id
-up_fingers = [0 for finger in range(4)]            # list of fingertip
-finger_start_times = {i: None for i in range(4)}   # time when the finger was first detected up
-all_fingers_bent_time = None                       # time when all fingers were first detected bent
-distance_mode = False                              # flag for distance measurement mode
-print_fingers_mode = False                         # flag for print fingers mode
-print_coordinate_mode = False                      # flag for print coordinate mode
-previous_distance = None                           # Initialize previous distance as None
-
-
-def calculate_distance_between_finger(x1, y1, x2, y2):
-    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-
-def get_coordinate(hand_landmark, index, image):
-    return int(hand_landmark.landmark[index].x * image.shape[1]), int(hand_landmark.landmark[index].y * image.shape[0])
-
-
-def process_hand_landmarks(image, hand_landmarks):
-    mp_draw.draw_landmarks(image, hand_landmarks, mp_hand.HAND_CONNECTIONS)
-    x1, y1 = get_coordinate(hand_landmarks, 8, image)  # Index finger tip
-    x2, y2 = get_coordinate(hand_landmarks, 4, image)  # Thumb tip
-    distance = calculate_distance_between_finger(x1, y1, x2, y2)
-    distance_str = "{:.2f}".format(distance)
-    cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    cv2.circle(image, (x1, y1), 10, (255, 0, 0), -1)
-    cv2.circle(image, (x2, y2), 10, (255, 0, 0), -1)
-    cv2.putText(image, distance_str, (int((x1 + x2) / 2), int((y1 + y2) / 2) - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-    return distance
-
-
-def is_up_finger(points, hand_center_id, fingertip_id, finger_in_list_id):
-    """
-    `Finger is up? 1 : 0`
-    Логика определения:
-        Если расстояние от WRIST (запястье, 0 точка) до точки начала пальца
-        (INDEX_FINGER [5, 9, 13, 17]) больше, чем расстояние от точки начала пальца
-        (INDEX_FINGER [5, 9, 13, 17]) до кончика пальца, то палец согнут.
-    """
-    global up_fingers
-    distance_0_to_hand_center = abs(points[0] - points[hand_center_id])
-    distance_0_to_fingertip = abs(points[0] - points[fingertip_id])
-    distance_good = distance_0_to_hand_center + (distance_0_to_hand_center / 2)
-    if distance_0_to_fingertip > distance_good:
-        up_fingers[finger_in_list_id] = True
-    else:
-        up_fingers[finger_in_list_id] = False
 
 # read web-camera / stream from ESP-32
 camera = cv2.VideoCapture(0)
@@ -80,16 +38,20 @@ while camera.isOpened():
 
                 # Draw color point at frame
                 match point_id:
-                    case 8: cv2.circle(frame, (width, height), 15, (0, 0, 255), cv2.FILLED)        # Index finger
-                    case 12: cv2.circle(frame, (width, height), 15, (0, 255, 0), cv2.FILLED)       # Middle finger
-                    case 16: cv2.circle(frame, (width, height), 15, (255, 0, 0), cv2.FILLED)       # Ring finger
-                    case 20: cv2.circle(frame, (width, height), 15, (255, 255, 255), cv2.FILLED)   # Little finger
+                    case 8:
+                        cv2.circle(frame, (width, height), 15, (0, 0, 255), cv2.FILLED)  # Index finger
+                    case 12:
+                        cv2.circle(frame, (width, height), 15, (0, 255, 0), cv2.FILLED)  # Middle finger
+                    case 16:
+                        cv2.circle(frame, (width, height), 15, (255, 0, 0), cv2.FILLED)  # Ring finger
+                    case 20:
+                        cv2.circle(frame, (width, height), 15, (255, 255, 255), cv2.FILLED)  # Little finger
 
             # Check up fingers
-            is_up_finger(hand_points, 5, 8, 0)     # Index finger
-            is_up_finger(hand_points, 9, 12, 1)    # Middle finger
-            is_up_finger(hand_points, 13, 16, 2)   # Ring finger
-            is_up_finger(hand_points, 17, 20, 3)   # Little finger
+            is_up_finger(hand_points, 5, 8, 0)  # Index finger
+            is_up_finger(hand_points, 9, 12, 1)  # Middle finger
+            is_up_finger(hand_points, 13, 16, 2)  # Ring finger
+            is_up_finger(hand_points, 17, 20, 3)  # Little finger
 
             # Check finger uptime and set mode
             now = datetime.now()
@@ -114,7 +76,8 @@ while camera.isOpened():
                                 print_coordinate_mode = True
                                 print_fingers_mode = False
                                 distance_mode = False
-                                print("Middle finger has been up for 3 seconds, entering print index finger coordinates mode")
+                                print(
+                                    "Middle finger has been up for 3 seconds, entering print index finger coordinates mode")
 
                         finger_start_times[i] = None
                 else:
@@ -158,5 +121,3 @@ while camera.isOpened():
 # Close window
 camera.release()
 cv2.destroyAllWindows()
-
-
