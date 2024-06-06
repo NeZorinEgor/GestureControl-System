@@ -51,6 +51,7 @@ async def callback(
         url=token_url,
         data=data
     )
+    # return res.json()
     response.set_cookie("FBKI-token-home", res.json()["access_token"])
     return RedirectResponse(
         url="/"

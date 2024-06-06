@@ -3,6 +3,7 @@ import requests
 
 router = APIRouter(
     prefix="/yandex",
+    tags=["YandexService"],
 )
 
 
@@ -34,4 +35,3 @@ def execute_scenario(
     if not response.status_code == 200:
         return f"Ошибка при выполнении сценария: {response.status_code} - {response.text}"
     return f"Сценарий с ID {scenario_id} успешно выполнен."
-
