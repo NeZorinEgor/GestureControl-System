@@ -10,6 +10,6 @@ class FingersActionsModel(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     finger_id: Mapped[int] = mapped_column(
-        ForeignKey('fingers.id', ondelete='CASCADE'))
+        ForeignKey('fingers.id', ondelete='CASCADE'), default=0)
     action_id: Mapped[int] = mapped_column(
-        ForeignKey('actions.id', ondelete='CASCADE'))
+        ForeignKey('actions.id', ondelete='CASCADE'), default=0)

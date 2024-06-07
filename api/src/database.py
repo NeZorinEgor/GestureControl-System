@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlalchemy.orm import DeclarativeBase
 
 from src.config import settings
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy import String
 from sqlalchemy.orm import registry
 
@@ -20,7 +20,7 @@ async_session_factory = async_sessionmaker(
 
 # Dependency
 # db_session: AsyncSession = Depends(get_session)
-async def get_session():
+async def get_session() -> AsyncSession:
     async with async_session_factory() as session:
         yield session
 
