@@ -20,6 +20,7 @@ async def create_action(
     await db.commit()
     return db_action
 
+
 @router.get("/", )
 async def read_actions(
         db: AsyncSession = Depends(get_session)
