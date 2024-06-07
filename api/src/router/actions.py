@@ -37,4 +37,3 @@ async def delete_action(
     await db.execute(delete_stmt, {"id": action_id})
     await db.commit()
     return "delete"
-
