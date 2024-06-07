@@ -1,11 +1,13 @@
 import webbrowser
-
 import requests
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import RedirectResponse
 
 from src.config import settings
+
 from src.yandex_client.router import router as yandex_router
+from src.pages.router import router as page_router
+from src.router.actions import router as actions_router
+from src.router.device import router as devices_router
 
 
 app = FastAPI(
@@ -15,6 +17,9 @@ app = FastAPI(
 
 
 app.include_router(yandex_router)
+app.include_router(page_router)
+app.include_router(actions_router)
+app.include_router(devices_router)
 
 
 REDIRECT_URI = 'http://localhost:8000/callback'
@@ -51,8 +56,8 @@ async def callback(
         url=token_url,
         data=data
     )
-    # return res.json()
-    response.set_cookie("FBKI-token-home", res.json()["access_token"])
-    return RedirectResponse(
-        url="/"
-    )
+    response.set_cookie("FBKI-token-home", "y0_AgAAAAAhjzdVAAvjEAAAAAEGVy41AABNlvnoWpxIEJ5cpLKZzcshX2m57A")   # res.json()["access_token"]
+    return {
+        "ok": True,
+        "message": "Successful set token at cookie"
+    }

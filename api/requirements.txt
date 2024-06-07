@@ -1,4 +1,7 @@
-fastapi
+fastapi~=0.110.3
 uvicorn
 pydantic-settings
-requests
+requests~=2.31.0
+pydantic~=2.4.2
+SQLAlchemy~=2.0.29
+alembic~=1.13.1

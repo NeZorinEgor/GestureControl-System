@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    {% include 'components/header.html' %}
+
+    <div class="container mx-auto mt-4">
+        <h1 class="text-2xl font-bold">Welcome to Your Room Management Page</h1>
+        <p class="mt-2 text-lg">Here you can see a list of all your rooms. Use this page to keep track of your rooms and manage them efficiently.</p>
+        <p class="mt-2">If you need to add a new room, please use the 'Add Room' button located at the top of the page.</p>
+
+        <h2 class="mt-6 text-xl">Rooms List:</h2>
+        <div class="mt-4">
+            {% for r in rooms %}
+            <div class="p-4 border rounded mt-2">
+                <strong>ID:</strong> {{ r.id }} <br>
+                <strong>Name:</strong> {{ r.name }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

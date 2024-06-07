@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 import requests
+
+from src.yandex_client.schema import DeviceSchema, ScenariosSchema, RoomsSchema
 
 router = APIRouter(
     prefix="/yandex",
     tags=["YandexService"],
 )
 
-
-@router.get("/devices")
-def get_devices(
-        request: Request,
+# Dependency
+def get_home_info(
+    request: Request,
 ):
     token = request.cookies.get("FBKI-token-home")
     headers = {
@@ -18,6 +19,39 @@ def get_devices(
     return requests.get(
         url="https://api.iot.yandex.net/v1.0/user/info",
         headers=headers).json()
+
+
+@router.get("/devices")
+def get_devices(
+        home_list: dict = Depends(get_home_info)
+):
+    return [DeviceSchema(
+        id=device["id"],
+        name=device["name"]
+    ) for device in home_list["devices"]]
+
+
+@router.get("/rooms")
+def get_rooms(
+        home_list: dict = Depends(get_home_info)
+):
+    return [RoomsSchema(
+        id=room["id"],
+        name=room["name"],
+        household_id=room["household_id"],
+        devices=room["devices"]
+    ) for room in home_list["rooms"]]
+
+
+@router.get("/scenarios")
+def get_scenarios(
+        home_list: dict = Depends(get_home_info)
+):
+    return [ScenariosSchema(
+        id=scenario["id"],
+        name=scenario["name"],
+        is_active=scenario["is_active"]
+    ) for scenario in home_list["scenarios"]]
 
 
 @router.post("/execute-scenario")

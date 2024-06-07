@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scenario list</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    {% include 'components/header.html' %}
+   <div class="container mx-auto mt-4">
+        <h1 class="text-2xl font-bold">Welcome to Your Scenario Management Page</h1>
+        <p class="mt-2 text-lg">Here you can see a list of all your scenarios. Use this page to manage and execute your scenarios efficiently.</p>
+        <p class="mt-2">To execute a scenario, enter the scenario ID in the field below and click 'Send'.</p>
+
+        <h2 class="mt-6 text-xl">Scenarios List:</h2>
+        <div class="mt-4">
+            {% for s in scenarios %}
+            <div class="p-4 border rounded mt-2">
+                <strong>ID:</strong> {{ s.id }} <br>
+                <strong>Name:</strong> {{ s.name }} <br>
+                <strong>Active:</strong> {{ s.is_active }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-6">
+            <h2 class="text-xl">Execute Scenario</h2>
+            <div class="form-group mt-2">
+                <input
+                    type="text"
+                    id="scenario_id"
+                    placeholder="Scenario ID"
+                    name="scenario_id"
+                    class="border py-2 px-4 rounded"
+                >
+            </div>
+            <button onclick="executeScenario()" class="mt-2 bg-black text-white py-2 px-4 rounded">Send</button>
+            <div class="message mt-2" id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        async function executeScenario() {
+            const scenarioId = document.getElementById('scenario_id').value;
+            const messageDiv = document.getElementById('message');
+
+            if (!scenarioId) {
+                messageDiv.textContent = 'Please enter a scenario ID.';
+                messageDiv.style.color = 'red';
+                return;
+            }
+
+            const url = `http://localhost:8000/yandex/execute-scenario?scenario_id=${encodeURIComponent(scenarioId)}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // Если нужно отправлять куки
+                });
+
+                const result = await response.text();
+                if (response.ok) {
+                    messageDiv.textContent = result;
+                    messageDiv.style.color = 'green';
+                } else {
+                    messageDiv.textContent = `Error: ${result}`;
+                    messageDiv.style.color = 'red';
+                }
+            } catch (error) {
+                messageDiv.textContent = `Error: ${error.message}`;
+                messageDiv.style.color = 'red';
+            }
+        }
+    </script>
+    </div>
+</body>
+</html>
