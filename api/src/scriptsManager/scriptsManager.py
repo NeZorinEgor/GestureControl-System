@@ -4,6 +4,20 @@ import subprocess
 
 save_dir = "../../../scripts"
 
+def get():
+    current_directory = os.getcwd()
+
+    # Вывод текущей рабочей директории
+    print(f"Текущая рабочая директория: {current_directory}")
+
+
+def startScenario(url, scenario_id):
+    # Параметры, которые нужно передать
+    params = [str(url), str(scenario_id), ""]
+    # Запуск файла с параметрами
+    result = subprocess.run(['python', "../scripts/run_scenario.py"] + params, capture_output=True, text=True)
+    return result.stdout, result.stderr
+
 
 def startScript(path, string="", force=100):
     # Параметры, которые нужно передать

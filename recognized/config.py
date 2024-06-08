@@ -2,7 +2,8 @@ import cv2
 import mediapipe as mp
 
 logs = True
-camera = cv2.VideoCapture(0)
+# camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture("http://192.168.0.28:81/stream")
 # camera = cv2.VideoCapture("http://192.168.43.51:81/stream")
 
 

@@ -10,6 +10,7 @@ from recognized.src.logic import start
 from recognized.src.visualization import show
 
 # start()
+# show()
 start(print_fingers_mode=True)
 
 

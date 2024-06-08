@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 import cv2
+import mediapipe as mp
 
 from recognized.config import (logs, mp_hand, hands, mp_draw, camera)
 from recognized.src.measurements import (process_hand_landmarks,
@@ -8,6 +9,19 @@ from recognized.src.measurements import (process_hand_landmarks,
 
 
 
+# mediapipe hand settings
+mp_hand = mp.solutions.hands
+hands = mp_hand.Hands()
+mp_draw = mp.solutions.drawing_utils
+
+hand_points = [0 for point_id in range(21)]        # list of point ID
+up_fingers = [0 for finger in range(4)]            # list of fingertip
+finger_start_times = {i: None for i in range(4)}   # time when the finger was first detected up
+all_fingers_bent_time = None                       # time when all fingers were first detected bent
+distance_mode = False                              # flag for distance measurement mode
+print_fingers_mode = False                         # flag for print fingers mode
+print_coordinate_mode = False                      # flag for print coordinate mode
+previous_distance = None
 
 
 
@@ -31,10 +45,10 @@ def show(all_fingers_bent_time=None, distance_mode=False, print_fingers_mode=Fal
 
                 # Work with hand points
                 for point_id, point_coordinates in enumerate(hand_lms.landmark):
-
-                    width, height, color = frame.shape
-                    width, height = int(point_coordinates.x * height), int(point_coordinates.y * width)
-                    hand_points[point_id] = height
+                    if logs:
+                        width, height, color = frame.shape
+                        width, height = int(point_coordinates.x * height), int(point_coordinates.y * width)
+                        hand_points[point_id] = height
 
                     if logs:
                         # Draw color point at frame
@@ -56,22 +70,6 @@ def show(all_fingers_bent_time=None, distance_mode=False, print_fingers_mode=Fal
 
                 # Check finger uptime and set mode
                 now = datetime.now()
-                for i, finger_up in enumerate(up_fingers):
-                    if finger_up:
-                        if finger_start_times[i] is None:
-                            finger_start_times[i] = now
-                        elif now - finger_start_times[i] >= timedelta(seconds=3):
-                            if up_fingers.count(True) == 1:
-                                match i:
-                                    case 0:
-                                        distance_mode, print_fingers_mode, print_coordinate_mode = True, False, False
-                                    case 1:
-                                        distance_mode, print_fingers_mode, print_coordinate_mode = False, False, True
-                                    case 3:
-                                        distance_mode, print_fingers_mode, print_coordinate_mode = False, True, False
-                            finger_start_times[i] = None
-                    else:
-                        finger_start_times[i] = None
 
                 if up_fingers.count(True) == 4:
                     if all_fingers_bent_time is None:
@@ -96,12 +94,10 @@ def show(all_fingers_bent_time=None, distance_mode=False, print_fingers_mode=Fal
                             else:
                                 print(False)
                     previous_distance = current_distance
-
                 if print_fingers_mode:
                     if logs:
                         print("Printing up_fingers:", up_fingers)
                     cv2.putText(frame, str(up_fingers), (15, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-
                 if print_coordinate_mode:
                     finger_start_times[0] = None
                     if logs:
@@ -115,4 +111,5 @@ def show(all_fingers_bent_time=None, distance_mode=False, print_fingers_mode=Fal
     # Close window
     camera.release()
     cv2.destroyAllWindows()
+
 

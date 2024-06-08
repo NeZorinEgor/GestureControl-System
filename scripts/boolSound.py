@@ -5,9 +5,9 @@ import sys
 
 # Получение параметров командной строки
 params = sys.argv[1:]  # Первым элементом в sys.argv является имя скрипта
-state = bool(params[-1])
+state = int(params[-1])
 
-# Получение всех аудио-устройств
+# Получение всех аудио-устройствs
 devices = AudioUtilities.GetSpeakers()
 interface = devices.Activate(
     IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
