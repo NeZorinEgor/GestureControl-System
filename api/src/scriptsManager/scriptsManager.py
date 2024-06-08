@@ -5,13 +5,13 @@ import subprocess
 save_dir = "../../../scripts"
 
 
-def startScript(path, mac="", force=100):
+def startScript(path, string="", force=100):
     # Параметры, которые нужно передать
-    params = [str(mac), str(force)]
+    params = [str(string), str(force)]
 
     # Запуск файла с параметрами
     result = subprocess.run(['python', path] + params, capture_output=True, text=True)
-    return result.stdout
+    return result.stdout, result.stderr
 
 
 def saveScript(path, name=None, save_dir=None):
